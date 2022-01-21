@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Sohun Patel
+// Engineer: Sohun Patel
 // 
 // Create Date: 11/26/2021 09:30:06 PM
 // Design Name: 
 // Module Name: pc
-// Project Name: 
-// Target Devices: 
+// Project Name: RISC V processor
+// Target Devices: Nexys A7
 // Tool Versions: 
 // Description: 
 // 
