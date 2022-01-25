@@ -1,12 +1,12 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Sohun Patel
+// Engineer: Sohun Patel
 // 
 // Create Date: 01/18/2022 09:09:51 PM
-// Design Name: 
+// Design Name: Memory Controller
 // Module Name: mem_controller
-// Project Name: 
+// Project Name: RISC V Processor
 // Target Devices: 
 // Tool Versions: 
 // Description: 
@@ -20,27 +20,27 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-    module mem_controller(
-    input clk,
-    input reset,
-    output ready,
-    input execute,
-    input dataWe,
-    input [31:0] address,
+module mem_controller(
+    input Clk,
+    input Reset,
+    output Ready,
+    input Execute,
+    input DataWe,
+    input [31:0] Address,
     input [31:0] InData,
-    input [1:0] dataByteEn,
-    input signExtend,
+    input [1:0] DataByteEn,
+    input SignExtend,
     output [31:0] OutData,
-    output dataReady,
-    input MEM_ready,
-    output MEM_cmd,
-    output MEM_we,
-    output [1:0] MEM_byteEnable,
-    output [31:0] MEM_addr,
+    output DataReady,
+    input MEM_Ready,
+    output MEM_Cmd,
+    output MEM_We,
+    output [1:0] MEM_ByteEnable,
+    output [31:0] MEM_Addr,
     output [31:0] MEM_InData,
     input [31:0] MEM_OutData,
-    input MEM_dataReady
-    );
+    input MEM_DataReady
+);
     
     reg we = 1'b0;
     reg [31:0] addr = 32'h00000000;
@@ -52,29 +52,37 @@
     reg state = 2'b00;
     
     reg ready = 1'b0;
-    
-    always @ (posedge clk) begin
-        if (reset == 1'b1) 
+    reg dataReady;
+        
+    always @ (posedge Clk) begin
+        if (Reset == 1'b1) 
         begin
             we <= 1'b0;
             cmd <= 1'b0;
             state <= 1'b0;
             dataReady <= 1'b0;
         end
-        else if (state == 1'b0 && execute == 1'b1 && MEM_ready == 1'b1) 
+        else if (state == 1'b0 && Execute == 1'b1 && MEM_Ready == 1'b1) 
         begin
-            we <= dataWe;
-            addr <= address;
+            we <= DataWe;
+            addr <= Address;
             indata <= InData;
-            byteEnable <= dataByteEn;
+            byteEnable <= DataByteEn;
             cmd = 1'b1;
             dataReady <= 1'b0;
             outdata <= 32'hABCDEFEE;
-            if (dataWe == 1'b1)
+            if (DataWe == 1'b1)
                 state <= 2'b01; // read
             else
                 state <= 2'b10; // write
-        end 
+        end
+        else if (state ==2'b01)
+        begin
+            cmd <= 1'b0;
+            dataReady <= 1'b1;
+            outdata <= MEM_InData;
+            state <= 2'b10;
+        end
         else if (state == 2'b10) 
         begin
             cmd <= 0;
@@ -84,11 +92,12 @@
     end
     
     assign OutData = outdata;
-    assign ready = (MEM_ready & !execute);
+    assign Ready = (MEM_Ready & !Execute);
+    assign DataReady = dataReady;
     
-    assign MEM_cmd = cmd;
-    assign MEM_byteEnable = byteEnable;
-    assign MEM_data = indata;
-    assign MEM_addr = addr;
-    assign MEM_we = we;        
+    assign MEM_Cmd = cmd;
+    assign MEM_ByteEnable = byteEnable;
+    assign MEM_Data = indata;
+    assign MEM_Addr = addr;
+    assign MEM_We = we;
 endmodule
