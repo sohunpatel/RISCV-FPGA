@@ -40,6 +40,21 @@ module alu(
     output Wait
 );
 
-    
+    reg div_exec;
+    reg [1:0] div_op;
+    wire [31:0] div_dataResult;
+    wire div_done;
+    wire div_int;
+
+    alu_int32_div division_unit (
+        .Clk (Clk),
+        .Execute (div_exec),
+        .Dividend (DataA),
+        .Divisor (DataB),
+        .Op (div_op),
+        .DataResult (div_dataResult),
+        .Done (div_done),
+        .Int (div_int)
+    );
 
 endmodule

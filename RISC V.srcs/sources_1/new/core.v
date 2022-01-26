@@ -97,7 +97,6 @@ module core(
     reg dataDWe;
     reg [4:0] aluOp;
     reg [15:0] aluFunc;
-    reg [31:0] PC;
     reg [31:0] epc;
     reg [31:0] dataIMM;
     reg clear;
