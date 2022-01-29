@@ -91,14 +91,14 @@ module core(
         .MEM_DataReady (MEM_dataReady)
     );
     
-    reg en;
+    reg aluEn;
     reg [31:0] dataA;
     reg [31:0] dataB;
     reg dataDWe;
-    reg [4:0] aluOp;
-    reg [15:0] aluFunc;
+    wire [4:0] aluOp;
+    wire [15:0] aluFunc;
     reg [31:0] epc;
-    reg [31:0] dataIMM;
+    wire [31:0] dataIMM;
     reg clear;
     wire [31:0] dataResult;
     wire [31:0] branchTarget;
@@ -107,24 +107,60 @@ module core(
     wire shouldBranch;
     wire Wait;
     
-     alu alu_unit (
-         .Clk (Clk),
-         .En (en),
-         .DataA (dataA),
-         .DataB (dataB),
-         .DataDWe (dataDWe),
-         .AluOp (aluOp),
-         .AluFunc (aluFunc),
-         .PC (PC),
-         .Epc (epc),
-         .DataIMM (dataIMM),
-         .Clear (clear),
-         .DataResult (dataResult),
-         .BranchTarget (branchTarget),
-         .DataWriteReg (dataWriteReg),
-         .LastPC (lastPC),
-         .ShouldBranch (shouldBranch),
-         .Wait (Wait)
-     );
+    alu alu_unit (
+        .Clk (Clk),
+        .En (aluEn),
+        .DataA (dataA),
+        .DataB (dataB),
+        .DataDWe (dataDWe),
+        .AluOp (aluOp),
+        .AluFunc (aluFunc),
+        .PC (PC),
+        .Epc (epc),
+        .DataIMM (dataIMM),
+        .Clear (clear),
+        .DataResult (dataResult),
+        .BranchTarget (branchTarget),
+        .DataWriteReg (dataWriteReg),
+        .LastPC (lastPC),
+        .ShouldBranch (shouldBranch),
+        .Wait (Wait)
+    );
+    
+    reg decodeEn;
+    reg [31:0] dataInst;
+    wire [4:0] selRS1;
+    wire [4:0] selRS2;
+    wire [4:0] selD;
+    wire regDwe;
+    wire [4:0] memOp;
+    wire [4:0] csrOp;
+    wire [11:0] csrAddr;
+    wire trapExit;
+    wire multyCyAlu;
+    wire int;
+    wire [31:0] intData;
+    reg intAck;
+    
+    decoder RV32I (
+        .Clk (Clk),
+        .En (decodeEn),
+        .DataInst (dataInst),
+        .SelRS1 (selRS1),
+        .SelRS2 (selRS2),
+        .SelD (selD),
+        .DataIMM (dataIMM),
+        .RegDwe (regDwe),
+        .AluOp (aluOp),
+        .AluFunc (aluFunc),
+        .MemOp (memOp),
+        .CsrOp (csrOp),
+        .CsrAddr (csrAddr),
+        .TrapExit (trapExit),
+        .MultycyAlu (multyCyAlu),
+        .Int (int),
+        .IntData (IntData),
+        .IntAck (intAck) 
+    );
 
 endmodule
