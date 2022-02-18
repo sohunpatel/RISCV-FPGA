@@ -54,6 +54,7 @@ module decoder(
     reg [31:0] intData;
     reg multicy;
 
+    // Opcodes
     localparam LOAD = 5'b00000;
     localparam STORE = 5'b01000;
     localparam MADD = 5'b10000;
@@ -61,17 +62,36 @@ module decoder(
     localparam JALR = 5'b11001;
     localparam JAL = 5'b11011;
     localparam SYSTEM = 5'b11100;
-    localparam OP = 5'b011000;
+    localparam OP = 5'b01100;
     localparam OPIMM = 5'b00100;
     localparam MISCMEM = 5'b00011;
     localparam AUIPC = 5'b00101;
     localparam LUI = 5'b01101;
 
-    localparam IMM_I_SYSTEM_ECALL = 12'h0000;
-    localparam IMM_I_SYSTEM_EBREAK = 12'h0001;
-    localparam F7_PRIVOP_MRET = 7'b0011000;
-    localparam R2_PRIV_RET = 5'b00010;
+    localparam F3_SYSTEM_ECALL = 3'b000;
+    localparam IMM_I_SYSTEM_ECALL = 12'b000000000000;
+    localparam F3_SYSTEM_EBREAK = 3'b000;
+    localparam IMM_I_SYSTEM_EBREAK = 12'b000000000001;
+    localparam F3_SYSTEM_CSRRW = 3'b001;
+    localparam F3_SYSTEM_CSRRS = 3'b010;
+    localparam F3_SYSTEM_CSRRC = 3'b011;
+    localparam F3_SYSTEM_CSRRWI = 3'b101;
+    localparam F3_SYSTEM_CSRRSI = 3'b110;
+    localparam F3_SYSTEM_CSRRCI = 3'b111;
+
+
+    localparam F3_PRIVOP = 3'b000;
+
+    localparam F7_PRIVOP_URET       = 7'b0000000;
+    localparam F7_PRIVOP_SRET_WFI   = 7'b0001000;
+    localparam F7_PRIVOP_MRET       = 7'b0011000;
+    localparam F7_PRIVOP_SFENCE_VMA = 7'b0001001;
     
+    localparam RD_PRIVOP = 5'b00000;
+
+    localparam R2_PRIV_RET = 5'b00010;
+    localparam R2_PRIV_WFI = 5'b00101;
+
     always @ (posedge Clk)
     begin
         if (En == 1'b1)
@@ -110,9 +130,9 @@ module decoder(
                             end
                             memOp <= 5'b00000;
                             if (DataInst[31] == 1'b1) begin
-                                dataIMM <= { 12'hFFFF, DataInst[19:12], DataInst[20], DataInst[30:21], 1'b0 };
+                                dataIMM <= { 12'hFFF, DataInst[19:12], DataInst[20], DataInst[30:21], 1'b0 };
                             end else begin
-                                dataIMM <= { 12'h0000, DataInst[19:12], DataInst[20], DataInst[30:21], 1'b0 };
+                                dataIMM <= { 12'h000, DataInst[19:12], DataInst[20], DataInst[30:21], 1'b0 };
                             end
                         end
                 JALR  : begin
@@ -127,9 +147,9 @@ module decoder(
                             end
                             memOp <= 5'b00000;
                             if (DataInst[31] == 1'b1) begin
-                                dataIMM <= { 12'hFFFF, 4'hF, DataInst[31:20] };
+                                dataIMM <= { 12'hFFF, 4'hF, DataInst[31:20] };
                             end else begin
-                                dataIMM <= { 12'h0000, 4'h0, DataInst[31:20] };
+                                dataIMM <= { 12'h000, 4'h0, DataInst[31:20] };
                             end
                         end
                 OPIMM : begin
@@ -140,9 +160,9 @@ module decoder(
                             regDwe <= 1'b1;
                             memOp <= 5'b00000;
                             if (DataInst[31] == 1'b1) begin
-                                dataIMM <= { 12'hFFFF, 4'hF, DataInst[31:20] };
+                                dataIMM <= { 12'hFFF, 4'hF, DataInst[31:20] };
                             end else begin
-                                dataIMM <= { 12'h0000, 4'h0, DataInst[31:20] };
+                                dataIMM <= { 12'h000, 4'h0, DataInst[31:20] };
                             end
                         end
                 OP    : begin
@@ -164,11 +184,11 @@ module decoder(
                                 csrOp <= 5'b00000;
                                 int <= 1'b0;
                                 regDwe <= 1'b1;
-                                memOp = { 10, DataInst[14:12] };
+                                memOp = { 2'b10, DataInst[14:12] };
                                 if (DataInst[31] == 1'b0) begin
-                                    dataIMM <= { 12'hFFFF, 4'hF, DataInst[31:20] };
+                                    dataIMM <= { 12'hFFF, 4'hF, DataInst[31:20] };
                                 end else begin
-                                    dataIMM <= { 12'h0000, 4'h0, DataInst[31:20] };
+                                    dataIMM <= { 12'h000, 4'h0, DataInst[31:20] };
                                 end
                             end else begin
                                 trapExit <= 1'b0;
@@ -188,9 +208,9 @@ module decoder(
                             regDwe <= 1'b0;
                             memOp <= { 2'b11, DataInst[14:12] };
                             if (DataInst[31] == 1'b1) begin
-                                dataIMM <= { 12'hFFFF, 4'hF, DataInst[31:25], DataInst[11:7] };
+                                dataIMM <= { 12'hFFF, 4'hF, DataInst[31:25], DataInst[11:7] };
                             end else begin
-                                dataIMM <= { 12'h0000, 4'h0, DataInst[31:25], DataInst[11:7] };
+                                dataIMM <= { 12'h000, 4'h0, DataInst[31:25], DataInst[11:7] };
                             end
                         end
                 BRANCH : begin
@@ -201,9 +221,9 @@ module decoder(
                             regDwe <= 1'b0;
                             memOp <= 5'b00000;
                             if (DataInst[31] == 1'b1) begin
-                                dataIMM <= { 12'hFFFF, 4'hF, DataInst[7], DataInst[30:25], DataInst[11:8], 1'b0 };
+                                dataIMM <= { 12'hFFF, 4'hF, DataInst[7], DataInst[30:25], DataInst[11:8], 1'b0 };
                             end else begin
-                                dataIMM <= { 12'h0000, 4'h0, DataInst[7], DataInst[30:25], DataInst[11:8], 1'b0 };
+                                dataIMM <= { 12'h000, 4'h0, DataInst[7], DataInst[30:25], DataInst[11:8], 1'b0 };
                             end
                         end
                 MISCMEM : begin

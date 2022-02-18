@@ -23,45 +23,63 @@
 module core_tb;
 
 reg clk;
-reg reset;
-reg halt;
-reg [31:0] intData;
-reg int;
-wire intAck;
-reg MEM_ready;
-wire MEM_Cmd;
-wire MEM_we;
-wire [1:0] MEM_byteEnable;
-wire [31:0] MEM_addr;
-wire [31:0] MEM_dataOut;
-reg [31:0] MEM_dataIn;
-reg MEM_dataReady;
-wire halted;
-wire [63:0] dbg;
+reg en;
+reg [31:0] dataInst;
+wire [4:0] selRS1;
+wire [4:0] selRS2;
+wire [4:0] selD;
+wire [31:0] dataIMM;
+wire regDwe;
+wire [6:0] aluOp;
+wire [15:0] aluFunc;
+wire [4:0] memOp;
+wire [4:0] csrOp;
+wire [11:0] csrAddr;
+wire trapExit;
+wire multyCyAlu;
+wire int;
+wire [31:0] intData;
+reg intAck;
 
-core core_uut (
+decoder uut (
     .Clk (clk),
-    .Reset (reset),
-    .Halt (halt),
-    .IntData (intData),
+    .En (en),
+    .DataInst (dataInst),
+    .SelRS1 (selRS1),
+    .SelRS2 (selRS2),
+    .SelD (selD),
+    .DataIMM (dataIMM),
+    .RegDwe (regDwe),
+    .AluOp (aluOp),
+    .AluFunc (aluFunc),
+    .MemOp (memOp),
+    .CsrOp (csrOp),
+    .CsrAddr (csrAddr),
+    .TrapExit (trapExit),
+    .MultycyAlu (multyCyAlu),
     .Int (int),
-    .IntAck (intAck),
-    .MEM_Ready (MEM_ready),
-    .MEM_Cmd (MEM_cmd),
-    .MEM_We (MEM_we),
-    .MEM_ByteEnable (MEM_byteEnable),
-    .MEM_Addr (MEM_addr),
-    .MEM_DataOut (MEM_dataOut),
-    .MEM_DataIn (MEM_dataIn),
-    .MEM_DataReady (MEM_dataReady),
-    .Halted (halted),
-    .Dbg (dbg)
+    .IntData (intData),
+    .IntAck (intAck)
 );
 
-// generate clock
+// generate clock and initialize inputs
 initial begin
     clk = 0;
-    forever #10 clk = ~clk;
+    en = 1'b0;
+    dataInst = 32'h00000000;
+    intAck = 1'b0;
+    forever #2 clk = ~clk;
+end
+
+reg [31:0] i;
+
+// test decoding
+initial begin
+    en = 'b1;
+    for (i = 0; $unsigned(i) < 32'hFFFFFFFF; i = i + 1) begin
+        dataInst = $unsigned(i);
+        #4;
+    end
 end
 
 endmodule

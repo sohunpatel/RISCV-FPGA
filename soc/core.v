@@ -92,12 +92,12 @@ module core(
     );
     
     reg aluEn;
-    reg [31:0] dataA;
-    reg [31:0] dataB;
+    wire [31:0] dataA;
+    wire [31:0] dataB;
     reg dataDWe;
     wire [4:0] aluOp;
     wire [15:0] aluFunc;
-    reg [31:0] epc;
+    wire [31:0] epc;
     wire [31:0] dataIMM;
     reg clear;
     wire [31:0] dataResult;
@@ -161,6 +161,137 @@ module core(
         .Int (int),
         .IntData (IntData),
         .IntAck (intAck) 
+    );
+    
+    reg registerEn;
+    reg [31:0] dataD;
+    reg regWe;
+    
+    registers file (
+        .Clk (Clk),
+        .En (registerEn),
+        .DataD (dataD),
+        .SelRS1 (selRS1),
+        .SelRS2 (selRS2),
+        .SelD (selD),
+        .We (regWe),
+        .DataA (dataA),
+        .DataB (dataB)
+    );
+
+    reg lintReset;
+    reg [3:0] lintEnMask;
+    reg int0;
+    reg [31:0] intData0;
+    wire [31:0] intAck0;
+    reg int1;
+    reg [31:0] intData1;
+    wire [31:0] intAck1;
+    reg int2;
+    reg [31:0] intData2;
+    wire [31:0] intAck2;
+    reg int3;
+    reg [31:0] intData3;
+    wire [31:0] intAck3;
+
+    lint lint_uint (
+        .Clk (Clk),
+        .Reset (lintReset),
+        .NextPC (nextPC),
+        .PC (PC),
+        .EnMask (lintEnMask),
+        .Int0 (int0),
+        .IntData0 (intData0),
+        .IntAck0 (intAck0),
+        .Int1 (int1),
+        .IntData1 (intData1),
+        .IntAck1 (intAck1),
+        .Int2 (int2),
+        .IntData2 (intData2),
+        .IntAck2 (intAck2),
+        .Int3(int3),
+        .IntData3 (intData3),
+        .IntAck3 (intAck3),
+        .Int (int),
+        .IntData (intData),
+        .IntEpc (epc)
+    );
+
+    reg csrEn;
+    reg [31:0] csrDataIn;
+    wire [31:0] csrDataOut;
+    reg instRetTick;
+
+    reg [31:0] intCause;
+    reg [31:0] intPC;
+    reg [31:0] intMtval;
+
+    reg intEntry;
+    reg intExit;
+
+    wire [31:0] csrStatus;
+    wire [31:0] csrCause;
+    wire [31:0] csrIe;
+    wire [31:0] csrTvec;
+    wire [31:0] csrEpc;
+
+    csr csr_unit (
+        .Clk (clk),
+        .En (csrEn),
+        .DataIn (csrDataIn),
+        .DataOut (csrDataOut),
+        .CsrOp (csrOp),
+        .CsrAddr (csrAddr),
+        .Int (int),
+        .IntData (intData),
+        .InstRetTick (instRetTick),
+        .IntCause (intCause),
+        .IntPC (intPC),
+        .IntMtval (intMtval),
+        .IntEntry (intEntry),
+        .IntExit (intExit),
+        .CsrStatus (csrStatus),
+        .CsrCause (csrCause),
+        .CsrIe (csrIe),
+        .CsrTvec (csrTvec),
+        .CsrEpc (csrEpc)
+    );
+    
+    reg intEnabled;
+    reg [31:0] intMemData;
+    wire [31:0] iData;
+    wire setIData;
+    wire setIPC;
+    wire setIrPC;
+    wire instTick;
+    reg misalignment;
+    reg controlReady;
+    wire controlExecute;
+    reg ctrlDataReady;
+    reg aluWait;
+    reg aluMultiCy;
+    wire [6:0] controlState;
+    
+    control control_unit (
+        .Clk (Clk),
+        .Reset (Reset),
+        .Halt (Halt),
+        .AluOp (aluOp),
+        .IntEnabled (intEnabled),
+        .Int (Int),
+        .IntAck (intAck),
+        .IntMemData (intMemData),
+        .IData (iData),
+        .SetIData (setIData),
+        .SetIrPC (setIrPC),
+        .InstTick (instTick),
+        .Misalignment (misalignment),
+        .Ready (controlReady),
+        .Execute (controlExecute),
+        .DataReady (ctrlDataReady),
+        .AluWait (aluWait),
+        .AluMultiCy (aluMultiCy),
+        .State (controlState)
     );
 
 endmodule

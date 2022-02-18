@@ -28,12 +28,13 @@ module pc(
     output [31:0] PC
     );
     
+    reg [31:0] current_pc;
+    
+    // PC unit opcodes
     localparam PC_OP_NOP = 2'b00;
     localparam PC_OP_INC = 2'b01;
     localparam PC_OP_ASSIGN = 2'b10;
     localparam PC_OP_RESET = 2'b11;
-    
-    reg [31:0] current_pc;
     
     always @ (posedge clk) begin
         case (nextPCop)
