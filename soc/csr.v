@@ -64,9 +64,9 @@ module csr(
 
     reg [31:0] csrOp;
     reg [1:0] opState;
-    localparam STEP_READ_OR_IDLE = 1'b00;
-    localparam STEP_MODIFY = 1'b01;
-    localparam STEP_WRITE = 1'b10;
+    localparam STEP_READ_OR_IDLE = 2'b00;
+    localparam STEP_MODIFY = 2'b01;
+    localparam STEP_WRITE = 2'b10;
 
     localparam CSR_ADDR_PRIVILEGE_BIT_START  = 32'h00000009;
     localparam CSR_ADDR_PRIVILEGE_BIT_END    = 32'h00000008;
