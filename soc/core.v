@@ -159,7 +159,7 @@ module core(
         .TrapExit (trapExit),
         .MultycyAlu (multyCyAlu),
         .Int (int),
-        .IntData (IntData),
+        .IntData (intData),
         .IntAck (intAck) 
     );
     
